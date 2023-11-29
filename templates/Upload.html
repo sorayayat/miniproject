@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <title>얼굴 등록 페이지</title>
+    <style>
+        /* Custom styles go here */
+        body {
+            background-color: #f4f4f4; /* Light gray background */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #resultContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #resultText {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd; /* Add a thin border */
+        }
+
+        #captureButton {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="ui header">안녕하세요</h1>
+        <h4 class="ui header">화면 중앙에 얼굴을 맞추고 버튼을 눌러주세요</h4>
+    </div>
+    <div class="container">
+        <div class="ui segment">
+            <video id="video" autoplay class="ui image"></video>
+            <img id="captureImage" style="display: none;" class="ui image">
+            <button id="captureButton" class="ui primary button">Capture</button>
+        </div>
+        <div id="resultContainer">
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('captureButton');
+        const captureImage = document.getElementById('captureImage');
+        const resultText = document.getElementById('resultText');
+
+        // 웹캠 스트림 받아오기
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing webcam:', error);
+            });
+
+        // 캡쳐 버튼 클릭 이벤트 처리
+        captureButton.addEventListener('click', () => {
+            // 캡쳐된 이미지를 캔버스에 그리기
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 캡쳐된 이미지를 Blob으로 변환
+            canvas.toBlob((blob) => {
+                // Blob을 파일로 저장
+                const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+
+                // 파일을 서버로 전송
+                const formData = new FormData();
+                formData.append('imageFile', file);
+
+                fetch('/loginface', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json()) // assuming server returns JSON
+                    .then(data => {
+                        if (data.result) {
+                            console.log('Result from server:', data.result);
+                            resultText.textContent = data.result;
+                        } else {
+                            console.error('Server did not provide a result.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error receiving result from the server:', error);
+                    });
+            }, 'image/jpeg');
+        });
+
+    </script>
+</body>
+
+</html>
