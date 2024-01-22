@@ -3,7 +3,7 @@ import os
 import cv2
 import numpy as np
 from insightface.app import FaceAnalysis
-from fastapi import FastAPI, File, Request, UploadFile, Depends, Form
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 # DB 관련 패키지
