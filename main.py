@@ -17,6 +17,8 @@ from sqlalchemy.orm import sessionmaker
 
 # 모델 가져와서 사용준비
 face = FaceAnalysis(providers=['CPUExecutionProvider'])
+# face = FaceAnalysis(providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+
 face.prepare(ctx_id=0, det_size=(640, 640))
 
 # fastapi 객체 생성하기
